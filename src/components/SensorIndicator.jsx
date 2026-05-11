@@ -1,65 +1,92 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 
-export default function SensorIndicator({ gamma = 0, magnitude = 9.8, isPouring = false, isShaking = false, isSteady = false, sensorActive }) {
-  const [visible, setVisible] = useState(true)
+export default function SensorIndicator({ gamma = 0, magnitude = 9.8, isActive = false }) {
+  const [showReadout, setShowReadout] = useState(false)
+  const [touchMode, setTouchMode] = useState(false)
 
-  if (sensorActive === false) return null
+  useEffect(() => {
+    if (isActive) { setTouchMode(false); return }
+    const t = setTimeout(() => setTouchMode(true), 4000)
+    return () => clearTimeout(t)
+  }, [isActive])
 
-  const state = isPouring ? 'POURING' : isShaking ? 'SHAKING' : isSteady ? 'STEADY' : 'IDLE'
-  const stateColor = isPouring ? '#3b82f6' : isShaking ? '#f59e0b' : isSteady ? '#2ecc71' : 'rgba(255,255,255,0.25)'
+  // Magnitude bar: 0 at rest (~9.8), 1 at vigorous shake (~26)
+  const magBar = Math.min(1, Math.max(0, (magnitude - 8) / 18))
 
   return (
-    <>
-      {/* Eye toggle button */}
-      <button
-        onClick={() => setVisible(v => !v)}
+    <div style={{ position: 'fixed', top: 14, right: 14, zIndex: 200, display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 6 }}>
+      {/* Status pill */}
+      <motion.button
+        whileTap={{ scale: 0.93 }}
+        onClick={() => setShowReadout(v => !v)}
         style={{
-          position: 'fixed', top: 10, left: 10, zIndex: 200,
-          background: 'rgba(0,0,0,0.55)', backdropFilter: 'blur(8px)',
-          border: '1px solid rgba(255,255,255,0.12)', borderRadius: 8,
-          color: 'rgba(255,255,255,0.5)', cursor: 'pointer',
-          padding: '4px 7px', fontSize: 14, lineHeight: 1,
+          display: 'flex', alignItems: 'center', gap: 6,
+          padding: '5px 11px 5px 8px', borderRadius: 20,
+          background: 'rgba(0,0,0,0.65)', backdropFilter: 'blur(12px)',
+          border: `1px solid ${isActive ? 'rgba(46,204,113,0.45)' : touchMode ? 'rgba(234,179,8,0.45)' : 'rgba(255,255,255,0.1)'}`,
+          cursor: 'pointer', fontFamily: 'inherit', outline: 'none',
         }}
-        aria-label={visible ? 'Hide sensor debug overlay' : 'Show sensor debug overlay'}
+        aria-label={isActive ? 'Sensors live — tap for readout' : 'Touch mode — tap for readout'}
       >
-        {visible ? '👁' : '🙈'}
-      </button>
+        <motion.div
+          animate={isActive ? { scale: [1, 1.4, 1] } : {}}
+          transition={{ duration: 1.6, repeat: Infinity, ease: 'easeInOut' }}
+          style={{
+            width: 7, height: 7, borderRadius: '50%', flexShrink: 0,
+            background: isActive ? '#2ecc71' : touchMode ? '#eab308' : 'rgba(255,255,255,0.2)',
+            boxShadow: isActive ? '0 0 7px #2ecc71' : touchMode ? '0 0 7px #eab308' : 'none',
+          }}
+        />
+        <span style={{
+          fontSize: 11, fontWeight: 600, fontFamily: 'monospace',
+          color: isActive ? '#2ecc71' : touchMode ? '#eab308' : 'rgba(255,255,255,0.3)',
+          whiteSpace: 'nowrap',
+        }}>
+          {isActive ? `${Math.abs(gamma).toFixed(1)}°` : touchMode ? 'Touch mode' : '…'}
+        </span>
+      </motion.button>
 
+      {/* Live readout card */}
       <AnimatePresence>
-        {visible && (
+        {showReadout && (
           <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.9 }}
+            initial={{ opacity: 0, scale: 0.88, y: -8 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.88, y: -8 }}
+            transition={{ type: 'spring', stiffness: 320, damping: 28 }}
             style={{
-              position: 'fixed', top: 36, left: 10, zIndex: 199,
-              background: 'rgba(0,0,0,0.72)',
-              backdropFilter: 'blur(10px)', WebkitBackdropFilter: 'blur(10px)',
+              background: 'rgba(0,0,0,0.78)',
+              backdropFilter: 'blur(14px)', WebkitBackdropFilter: 'blur(14px)',
               border: '1px solid rgba(255,255,255,0.1)',
-              borderRadius: 10, padding: '8px 12px',
-              pointerEvents: 'none', minWidth: 120,
+              borderRadius: 12, padding: '10px 14px', minWidth: 136,
             }}
-            aria-label={`Sensor debug: gamma ${Math.round(gamma)}°, magnitude ${magnitude.toFixed(1)}, state ${state}`}
-            aria-live="polite"
           >
-            <div style={{ fontFamily: 'monospace', fontSize: 11, lineHeight: 1.7 }}>
-              <div style={{ color: 'rgba(255,255,255,0.45)', marginBottom: 2, fontSize: 9, letterSpacing: 1, textTransform: 'uppercase' }}>Sensor Debug</div>
+            <div style={{ fontFamily: 'monospace', fontSize: 12, lineHeight: 1.85 }}>
               <div>
-                <span style={{ color: 'rgba(255,255,255,0.35)' }}>γ  </span>
-                <span style={{ color: '#a78bfa', fontWeight: 700 }}>{Math.round(gamma)}°</span>
+                <span style={{ color: 'rgba(255,255,255,0.38)' }}>Tilt   </span>
+                <span style={{ color: '#a78bfa', fontWeight: 700 }}>{gamma.toFixed(1)}°</span>
               </div>
               <div>
-                <span style={{ color: 'rgba(255,255,255,0.35)' }}>|a| </span>
-                <span style={{ color: '#7fb3c8', fontWeight: 700 }}>{magnitude.toFixed(1)}</span>
+                <span style={{ color: 'rgba(255,255,255,0.38)' }}>Motion </span>
+                <span style={{ color: '#7fb3c8', fontWeight: 700 }}>{magnitude.toFixed(1)}g</span>
               </div>
-              <div style={{ marginTop: 3 }}>
-                <span style={{ color: stateColor, fontWeight: 800, fontSize: 10 }}>{state}</span>
-              </div>
+            </div>
+            <div style={{ marginTop: 8, height: 4, borderRadius: 4, background: 'rgba(255,255,255,0.07)' }}>
+              <motion.div
+                animate={{ width: `${Math.round(magBar * 100)}%` }}
+                transition={{ type: 'spring', stiffness: 260, damping: 28 }}
+                style={{
+                  height: '100%', borderRadius: 4,
+                  background: magnitude > 18 ? '#f59e0b' : '#2ecc71',
+                  boxShadow: magnitude > 18 ? '0 0 6px #f59e0b80' : '0 0 4px #2ecc7160',
+                  minWidth: 4,
+                }}
+              />
             </div>
           </motion.div>
         )}
       </AnimatePresence>
-    </>
+    </div>
   )
 }

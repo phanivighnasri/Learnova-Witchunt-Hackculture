@@ -1,78 +1,81 @@
 import { useState, useEffect, useRef } from 'react'
 
 const useSensors = () => {
-  const [gamma, setGamma] = useState(0)
-  const [magnitude, setMagnitude] = useState(9.8)
-  const [isPouring, setIsPouring] = useState(false)
-  const [isShaking, setIsShaking] = useState(false)
-  const [isSteady, setIsSteady] = useState(false)
-  const [sensorActive, setSensorActive] = useState(null) // null=unknown, true, false
+  const gammaRef = useRef(0)
+  const magRef = useRef(9.8)
+  const historyRef = useRef([])
+  const lastShakeRef = useRef(0)
 
-  const smoothGamma = useRef(0)
-  const smoothMag = useRef(9.8)
-  const magHistory = useRef([])
-  const lastShakeTime = useRef(0)
-  const shakeResetTimer = useRef(null)
-  const fallbackTimer = useRef(null)
-  const gotEvent = useRef(false)
+  const [sensorData, setSensorData] = useState({
+    gamma: 0,
+    beta: 0,
+    magnitude: 9.8,
+    isPouring: false,
+    pourRate: 0,
+    isShaking: false,
+    isSteady: false,
+    isActive: false,
+  })
 
   useEffect(() => {
-    if (typeof window === 'undefined') return
+    const onOrientation = (e) => {
+      if (e.gamma === null || e.gamma === undefined) return
 
-    fallbackTimer.current = setTimeout(() => {
-      if (!gotEvent.current) setSensorActive(false)
-    }, 3000)
+      gammaRef.current = 0.7 * gammaRef.current + 0.3 * e.gamma
+      const g = gammaRef.current
+      const pouring = Math.abs(g) > 25
+      const pourRate = pouring ? Math.min((Math.abs(g) - 25) / 45, 1) : 0
 
-    const handleOrientation = (e) => {
-      if (e.gamma === null) return
-      if (!gotEvent.current) {
-        gotEvent.current = true
-        clearTimeout(fallbackTimer.current)
-        setSensorActive(true)
-      }
-      smoothGamma.current = 0.75 * smoothGamma.current + 0.25 * (e.gamma || 0)
-      setGamma(smoothGamma.current)
-      setIsPouring(Math.abs(smoothGamma.current) > 25)
+      setSensorData(prev => ({
+        ...prev,
+        gamma: g,
+        beta: e.beta || 0,
+        isPouring: pouring,
+        pourRate,
+        isActive: true,
+      }))
     }
 
-    const handleMotion = (e) => {
-      const acc = e.accelerationIncludingGravity || e.acceleration
-      if (!acc) return
+    const onMotion = (e) => {
+      const acc = e.accelerationIncludingGravity
+      if (!acc || acc.x === null) return
 
-      const rawMag = Math.sqrt((acc.x || 0) ** 2 + (acc.y || 0) ** 2 + (acc.z || 0) ** 2)
-      smoothMag.current = 0.7 * smoothMag.current + 0.3 * rawMag
-      setMagnitude(smoothMag.current)
+      const raw = Math.sqrt((acc.x || 0) ** 2 + (acc.y || 0) ** 2 + (acc.z || 0) ** 2)
+      magRef.current = 0.6 * magRef.current + 0.4 * raw
+      const mag = magRef.current
 
-      // Rolling variance steady detection (15-reading window)
-      magHistory.current = [...magHistory.current.slice(-14), smoothMag.current]
-      if (magHistory.current.length >= 15) {
-        const avg = magHistory.current.reduce((a, b) => a + b, 0) / magHistory.current.length
-        const variance = magHistory.current.reduce((a, b) => a + Math.abs(b - avg), 0) / magHistory.current.length
-        setIsSteady(variance < 1.5)
-      }
+      historyRef.current.push(mag)
+      if (historyRef.current.length > 20) historyRef.current.shift()
+      const avg = historyRef.current.reduce((a, b) => a + b, 0) / historyRef.current.length
+      const variance = historyRef.current.reduce((s, v) => s + Math.abs(v - avg), 0) / historyRef.current.length
+      const steady = variance < 1.2 && historyRef.current.length >= 20
 
-      // Shake: spike above 20 with 500ms debounce
       const now = Date.now()
-      if (smoothMag.current > 20 && now - lastShakeTime.current > 500) {
-        lastShakeTime.current = now
-        setIsShaking(true)
-        clearTimeout(shakeResetTimer.current)
-        shakeResetTimer.current = setTimeout(() => setIsShaking(false), 150)
+      const shaking = mag > 22 && now - lastShakeRef.current > 600
+      if (shaking) {
+        lastShakeRef.current = now
+        try { navigator.vibrate?.([40, 20, 40]) } catch (_) {}
       }
+
+      setSensorData(prev => ({
+        ...prev,
+        magnitude: mag,
+        isShaking: shaking,
+        isSteady: steady,
+        isActive: true,
+      }))
     }
 
-    window.addEventListener('deviceorientation', handleOrientation, true)
-    window.addEventListener('devicemotion', handleMotion, true)
+    window.addEventListener('deviceorientation', onOrientation, true)
+    window.addEventListener('devicemotion', onMotion, true)
 
     return () => {
-      window.removeEventListener('deviceorientation', handleOrientation, true)
-      window.removeEventListener('devicemotion', handleMotion, true)
-      clearTimeout(fallbackTimer.current)
-      clearTimeout(shakeResetTimer.current)
+      window.removeEventListener('deviceorientation', onOrientation, true)
+      window.removeEventListener('devicemotion', onMotion, true)
     }
   }, [])
 
-  return { gamma, magnitude, isPouring, isShaking, isSteady, sensorActive }
+  return sensorData
 }
 
 export default useSensors

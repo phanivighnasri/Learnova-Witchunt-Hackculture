@@ -1,13 +1,12 @@
-const safe = (fn) => { try { fn() } catch (_) {} }
-
 const haptics = {
-  tap:         () => safe(() => navigator.vibrate?.(10)),
-  success:     () => safe(() => navigator.vibrate?.([50, 30, 80])),
-  warning:     () => safe(() => navigator.vibrate?.([100, 50, 100, 50, 200])),
-  pour:        () => safe(() => navigator.vibrate?.(20)),
-  shake:       () => safe(() => navigator.vibrate?.([30, 10, 30])),
-  achievement: () => safe(() => navigator.vibrate?.([50, 30, 50, 30, 50, 30, 200])),
-  error:       () => safe(() => navigator.vibrate?.([200])),
+  tap:         () => { try { navigator.vibrate?.(10);                     } catch (_) {} },
+  pour:        () => { try { navigator.vibrate?.(12);                     } catch (_) {} },
+  shake:       () => { try { navigator.vibrate?.([40, 20, 40]);           } catch (_) {} },
+  success:     () => { try { navigator.vibrate?.([60, 30, 100, 30, 200]); } catch (_) {} },
+  warning:     () => { try { navigator.vibrate?.([150, 50, 150]);         } catch (_) {} },
+  error:       () => { try { navigator.vibrate?.([300]);                  } catch (_) {} },
+  achievement: () => { try { navigator.vibrate?.([50, 30, 50, 30, 50, 30, 250]); } catch (_) {} },
+  reading:     () => { try { navigator.vibrate?.(25);                     } catch (_) {} },
 }
 
 export default haptics

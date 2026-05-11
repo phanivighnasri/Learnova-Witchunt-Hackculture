@@ -2,7 +2,7 @@ import { useState, useEffect, useRef, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import useSensors from '../../hooks/useSensors'
 import haptics from '../../utils/haptics'
-import SensorPermissionScreen from '../SensorPermissionScreen'
+import audio from '../../utils/audio'
 import SensorIndicator from '../SensorIndicator'
 import { useAccessibility } from '../../contexts/AccessibilityContext'
 
@@ -157,12 +157,11 @@ function ReagentShelf({ onStart, onBack }) {
         </div>
       </div>
 
-      {/* Acids */}
       <div style={{ padding:'4px 20px 14px' }}>
         <div style={{ fontSize:11, fontWeight:700, textTransform:'uppercase', letterSpacing:1, color:'#e74c3c', marginBottom:10 }}>⚗ Acids</div>
         <div style={{ display:'flex', gap:10 }}>
           {Object.values(ACIDS).map(a => (
-            <motion.div key={a.id} whileTap={{ scale:0.94 }} onClick={() => setAcid(a)} style={{
+            <motion.div key={a.id} whileTap={{ scale:0.94 }} onClick={() => { haptics.tap(); setAcid(a) }} style={{
               flex:'1', padding:'12px 8px', borderRadius:16, cursor:'pointer', textAlign:'center',
               background: acid?.id===a.id ? `rgba(${hexToRgb(a.color)},0.12)` : 'rgba(255,255,255,0.04)',
               border:`2px solid ${acid?.id===a.id ? a.color : 'rgba(255,255,255,0.08)'}`,
@@ -176,12 +175,11 @@ function ReagentShelf({ onStart, onBack }) {
         </div>
       </div>
 
-      {/* Bases */}
       <div style={{ padding:'0 20px 14px' }}>
         <div style={{ fontSize:11, fontWeight:700, textTransform:'uppercase', letterSpacing:1, color:'#3498db', marginBottom:10 }}>🧪 Bases</div>
         <div style={{ display:'flex', gap:10 }}>
           {Object.values(BASES).map(b => (
-            <motion.div key={b.id} whileTap={{ scale:0.94 }} onClick={() => setBase(b)} style={{
+            <motion.div key={b.id} whileTap={{ scale:0.94 }} onClick={() => { haptics.tap(); setBase(b) }} style={{
               flex:'1', padding:'12px 8px', borderRadius:16, cursor:'pointer', textAlign:'center',
               background: base?.id===b.id ? `rgba(${hexToRgb(b.color)},0.12)` : 'rgba(255,255,255,0.04)',
               border:`2px solid ${base?.id===b.id ? b.color : 'rgba(255,255,255,0.08)'}`,
@@ -194,7 +192,6 @@ function ReagentShelf({ onStart, onBack }) {
         </div>
       </div>
 
-      {/* Water */}
       <div style={{ padding:'0 20px 14px', display:'flex', alignItems:'center', gap:14 }}>
         <WaterBottleSVG size={50} />
         <div>
@@ -205,13 +202,12 @@ function ReagentShelf({ onStart, onBack }) {
         </div>
       </div>
 
-      {/* Concentration + Indicator */}
       <div style={{ padding:'0 20px 14px', display:'flex', gap:12 }}>
         <div style={{ flex:1 }}>
           <div style={{ fontSize:11, color:'rgba(255,255,255,0.45)', marginBottom:6 }}>Concentration</div>
           <div style={{ display:'flex', gap:5 }}>
             {['0.1M','0.5M','1M'].map(c => (
-              <button key={c} onClick={() => setConc(c)} style={{
+              <button key={c} onClick={() => { haptics.tap(); setConc(c) }} style={{
                 flex:1, padding:'8px 0', borderRadius:10, fontFamily:'inherit', cursor:'pointer',
                 border:`1.5px solid ${conc===c ? '#6b4fff' : 'rgba(255,255,255,0.1)'}`,
                 background: conc===c ? 'rgba(107,79,255,0.2)' : 'rgba(255,255,255,0.04)',
@@ -224,7 +220,7 @@ function ReagentShelf({ onStart, onBack }) {
           <div style={{ fontSize:11, color:'rgba(255,255,255,0.45)', marginBottom:6 }}>Indicator</div>
           <div style={{ display:'flex', gap:5 }}>
             {[{id:'phenolphthalein',label:'Phenol.'},{id:'litmus',label:'Litmus'}].map(ind => (
-              <button key={ind.id} onClick={() => setIndicator(ind.id)} style={{
+              <button key={ind.id} onClick={() => { haptics.tap(); setIndicator(ind.id) }} style={{
                 flex:1, padding:'8px 4px', borderRadius:10, fontFamily:'inherit', cursor:'pointer',
                 border:`1.5px solid ${indicator===ind.id ? '#6b4fff' : 'rgba(255,255,255,0.1)'}`,
                 background: indicator===ind.id ? 'rgba(107,79,255,0.2)' : 'rgba(255,255,255,0.04)',
@@ -235,7 +231,6 @@ function ReagentShelf({ onStart, onBack }) {
         </div>
       </div>
 
-      {/* Reaction preview */}
       <AnimatePresence>
         {rxn && (
           <motion.div initial={{ opacity:0, y:8 }} animate={{ opacity:1, y:0 }}
@@ -249,7 +244,7 @@ function ReagentShelf({ onStart, onBack }) {
 
       <div style={{ padding:'0 20px' }}>
         <motion.button whileTap={{ scale:0.97 }}
-          onClick={() => acid && base && onStart({ acid, base, conc, indicator })}
+          onClick={() => { if (acid && base) { haptics.tap(); onStart({ acid, base, conc, indicator }) } }}
           style={{
             width:'100%', padding:'16px 0', borderRadius:14, border:'none', fontFamily:'inherit',
             background: acid && base ? 'linear-gradient(135deg,#6b4fff,#8b5cf6)' : 'rgba(255,255,255,0.06)',
@@ -266,17 +261,17 @@ function ReagentShelf({ onStart, onBack }) {
 
 // ── Lab Experiment ────────────────────────────────────────────────────────
 const WARNINGS = {
-  waterOnAcid: '⚠️ DANGER! Never add water to concentrated H₂SO₄ — the reaction is violently exothermic and can cause spattering. Always add acid to water slowly.',
-  baseBeforeAcid: '⚠️ Add the acid first, then the base. This is standard titration procedure.',
+  waterOnAcid:  '⚠️ DANGER! Never add water to concentrated H₂SO₄ — the reaction is violently exothermic and can cause spattering. Always add acid to water slowly.',
+  baseBeforeAcid:'⚠️ Add the acid first, then the base. This is standard titration procedure.',
   violentShake: '⚠️ Careful! Vigorous mixing with strong acids can cause splashing. Mix gently.',
-  overshoot: '⚠️ You\'ve added too much base! The solution is now strongly alkaline. In a real lab you\'d need to start over or back-titrate.',
+  overshoot:    '⚠️ You\'ve added too much base! The solution is now strongly alkaline. In a real lab you\'d need to start over or back-titrate.',
 }
 
 function LabExperiment({ acid, base, conc, indicator, studentName, onComplete, onBack }) {
   const rxn = getRxn(acid.id, base.id)
   const startPH = acid.startPH[conc]
-
   const initialSubstep = acid.waterFirst ? 'waterFirst' : 'addAcid'
+
   const [substep, setSubstep] = useState(initialSubstep)
   const [waterFill, setWaterFill] = useState(0)
   const [acidFill, setAcidFill] = useState(0)
@@ -288,61 +283,67 @@ function LabExperiment({ acid, base, conc, indicator, studentName, onComplete, o
   const [flashWhite, setFlashWhite] = useState(false)
   const [confetti, setConfetti] = useState([])
   const [bubbleParticles, setBubbleParticles] = useState([])
-  const [slider, setSlider] = useState(0)
   const [startTime] = useState(Date.now())
   const [pHHistory, setPHHistory] = useState([startPH])
   const [triggeredWarnings, setTriggeredWarnings] = useState([])
 
+  // Sensor + touch state
+  const sensorData = useSensors()
+  const { gamma, pourRate, isPouring, isShaking, isSteady, isActive, magnitude } = sensorData
+
+  const [isTouchPouring, setIsTouchPouring] = useState(false)
+  const [touchFallback, setTouchFallback] = useState(false)   // auto after 4s if no sensors
+  const [tubeShaking, setTubeShaking] = useState(false)       // test tube shake animation
+  const [readingTaken, setReadingTaken] = useState(false)
+  const [readingToast, setReadingToast] = useState(false)
+  const [fallbackToast, setFallbackToast] = useState(false)
+  const fallbackToastShown = useRef(false)
+
   const neutralizedRef = useRef(false)
   const warnedRef = useRef(new Set())
-  const { gamma, magnitude, isPouring, isShaking, isSteady, sensorActive } = useSensors()
-  const { settings: { switchAccess, deafHoH, colorblind }, triggerAlert } = useAccessibility()
-
-  // iOS permission gate (shown once, before experiment)
-  const needsPermission = typeof DeviceMotionEvent !== 'undefined' &&
-    typeof DeviceMotionEvent.requestPermission === 'function'
-  const [permissionGranted, setPermissionGranted] = useState(!needsPermission)
-
-  // Pour haptics interval ref
-  const pourHapticRef2 = useRef(null)
-
-  // Switch Access: POUR button hold state
-  const [isPouringBtn, setIsPouringBtn] = useState(false)
-  const [scanIdx, setScanIdx] = useState(0)
   const substepRef = useRef(substep)
   useEffect(() => { substepRef.current = substep }, [substep])
 
-  // Reading-taken toast (hold still)
-  const [readingTaken, setReadingTaken] = useState(false)
-  const [readingToast, setReadingToast] = useState(false)
+  const { settings: { switchAccess, deafHoH, colorblind }, triggerAlert } = useAccessibility()
+  const [isPouringBtn, setIsPouringBtn] = useState(false)
+  const [scanIdx, setScanIdx] = useState(0)
 
-  // Desktop fallback toast (show once)
-  const [desktopToast, setDesktopToast] = useState(false)
-  const desktopToastShown = useRef(false)
+  // Touch fallback: auto-enable after 4s if sensors never fire
+  useEffect(() => {
+    if (isActive) { setTouchFallback(false); return }
+    const t = setTimeout(() => setTouchFallback(true), 4000)
+    return () => clearTimeout(t)
+  }, [isActive])
 
+  // Show one-time toast when touch fallback activates
+  useEffect(() => {
+    if (!touchFallback || fallbackToastShown.current) return
+    fallbackToastShown.current = true
+    setFallbackToast(true)
+    setTimeout(() => setFallbackToast(false), 3500)
+  }, [touchFallback])
+
+  // Derived values
   const totalFill = waterFill * 0.2 + acidFill * 0.38 + baseFill * 0.32
   const ph = (substep === 'addBase' || substep === 'neutralized') ? calcPH(startPH, baseFill)
            : acidFill > 0 ? startPH : null
   const tempC = 25 + (rxn.hot ? (acid.id === 'H2SO4' ? 55 : 25) : 8) * Math.min(1, baseFill * 2.2)
   const liqColor = ph !== null ? indicatorColor(indicator, ph, hasIndicator) : 'rgba(180,220,255,0.2)'
 
-  // Pour rate: real sensor (gamma) OR desktop slider fallback
-  const absGamma = Math.abs(gamma)
-  const pourRate = sensorActive
-    ? (isPouring ? Math.max(0, (absGamma - 25) / 65) * 0.012 : 0)
-    : slider * 0.003
+  // Active pour step check
+  const isActivePourStep = substep === 'waterFirst' || substep === 'addAcid' || substep === 'addBase'
+  const streamColor = substep === 'addBase' ? base.color : substep === 'waterFirst' ? '#7ec8e3' : acid.color
 
-  // Pour stream visual dimensions
-  const streamWidth = sensorActive
-    ? Math.max(3, Math.min(14, absGamma - 25))
-    : Math.max(3, Math.min(14, slider / 6))
-  const streamColor = substep === 'addBase' ? base.color
-    : substep === 'waterFirst' ? '#7ec8e3'
-    : acid.color
+  // Stream width: spec — 2px + pourRate * 8px
+  const streamWidth = isActive
+    ? 2 + pourRate * 8
+    : isTouchPouring ? 7 : 0
+  const showStream = (isPouring || isTouchPouring) && isActivePourStep
 
   const addWarning = useCallback((key, text) => {
     if (warnedRef.current.has(key)) return
     warnedRef.current.add(key)
+    haptics.warning()
     const id = Date.now()
     setWarnings(prev => [...prev.slice(-2), { id, text }])
     setTriggeredWarnings(prev => [...prev, text])
@@ -350,27 +351,91 @@ function LabExperiment({ acid, base, conc, indicator, studentName, onComplete, o
     setTimeout(() => setWarnings(prev => prev.filter(w => w.id !== id)), 7000)
   }, [triggerAlert])
 
-  useEffect(() => {
-    if (pourRate <= 0) return
-    if (substep === 'waterFirst') {
-      setWaterFill(prev => {
-        const next = Math.min(1, prev + pourRate)
-        if (next >= 0.75) setTimeout(() => setSubstep('addAcid'), 0)
-        return next
-      })
-    } else if (substep === 'addAcid') {
-      setAcidFill(prev => {
-        const next = Math.min(1, prev + pourRate)
-        if (next >= 0.72) setTimeout(() => setSubstep('addIndicator'), 0)
-        return next
-      })
-      setPHHistory(h => [...h.slice(-100), startPH])
-    } else if (substep === 'addBase') {
-      setBaseFill(prev => Math.min(1, prev + pourRate * 0.75))
-    }
-  }, [pourRate, substep, startPH])
+  const triggerShake = useCallback(() => {
+    setShakeCount(c => c + 1)
+    haptics.shake()
+    audio.bubble()
+    setTubeShaking(true)
+    setTimeout(() => setTubeShaking(false), 400)
+    // Bubble burst on liquid surface
+    setBubbleParticles(prev => [
+      ...prev,
+      ...Array.from({ length: 10 }, () => ({
+        id: Math.random(), x: 16 + Math.random() * 20, y: 155, r: 1.5 + Math.random() * 3, o: 0.9,
+      }))
+    ])
+    if (acid.id === 'H2SO4') addWarning('violentShake', WARNINGS.violentShake)
+  }, [acid.id, addWarning])
 
-  // pH history + neutralization + overshoot
+  // ── Real sensor: fill loop ───────────────────────────────────────────────
+  useEffect(() => {
+    if (!isActive || pourRate <= 0) return
+    const fillRate = pourRate * 0.012
+    const s = substep
+    if (s === 'waterFirst') {
+      setWaterFill(prev => { const n = Math.min(1, prev + fillRate); if (n >= 0.75) setTimeout(() => setSubstep('addAcid'), 0); return n })
+    } else if (s === 'addAcid') {
+      setAcidFill(prev => { const n = Math.min(1, prev + fillRate); if (n >= 0.72) setTimeout(() => setSubstep('addIndicator'), 0); return n })
+      setPHHistory(h => [...h.slice(-100), startPH])
+    } else if (s === 'addBase') {
+      setBaseFill(prev => Math.min(1, prev + fillRate * 0.75))
+    }
+  }, [pourRate, isActive, substep, startPH])
+
+  // ── Touch pour: interval-based fill ─────────────────────────────────────
+  useEffect(() => {
+    if (!isTouchPouring) return
+    const RATE = 0.008
+    const id = setInterval(() => {
+      haptics.pour()
+      const s = substepRef.current
+      if (s === 'waterFirst') {
+        setWaterFill(prev => { const n = Math.min(1, prev + RATE); if (n >= 0.75) setTimeout(() => setSubstep('addAcid'), 0); return n })
+      } else if (s === 'addAcid') {
+        setAcidFill(prev => { const n = Math.min(1, prev + RATE); if (n >= 0.72) setTimeout(() => setSubstep('addIndicator'), 0); return n })
+        setPHHistory(h => [...h.slice(-100), startPH])
+      } else if (s === 'addBase') {
+        setBaseFill(prev => Math.min(1, prev + RATE * 0.75))
+      }
+    }, 100)
+    return () => clearInterval(id)
+  }, [isTouchPouring, startPH])
+
+  // ── Pour haptics every 250ms while tilting on real sensor ────────────────
+  useEffect(() => {
+    if (!isPouring || !isActive || !isActivePourStep) return
+    const id = setInterval(() => haptics.pour(), 250)
+    return () => clearInterval(id)
+  }, [isPouring, isActive, isActivePourStep])
+
+  // ── Pour audio: start/stop when pouring state changes ───────────────────
+  useEffect(() => {
+    if ((isPouring && isActive) || isTouchPouring) {
+      audio.startPour(pourRate)
+      audio.updatePour(pourRate)
+    } else {
+      audio.stopPour()
+    }
+    return () => audio.stopPour()
+  }, [isPouring, isTouchPouring, isActive, pourRate])
+
+  // ── Shake detection from real sensor ────────────────────────────────────
+  useEffect(() => {
+    if (!isShaking) return
+    triggerShake()
+  }, [isShaking, triggerShake])
+
+  // ── Steady: pH reading lock ──────────────────────────────────────────────
+  useEffect(() => {
+    if (!isSteady || !isActive || substep !== 'addBase' || readingTaken) return
+    setReadingTaken(true)
+    haptics.reading()
+    audio.reading()
+    setReadingToast(true)
+    setTimeout(() => setReadingToast(false), 2500)
+  }, [isSteady, isActive, substep, readingTaken])
+
+  // ── pH history + neutralization + overshoot ──────────────────────────────
   useEffect(() => {
     if (ph === null) return
     setPHHistory(h => [...h.slice(-100), ph])
@@ -381,6 +446,7 @@ function LabExperiment({ acid, base, conc, indicator, studentName, onComplete, o
       setFlashWhite(true)
       triggerAlert('success', '⚗️ Neutralized!')
       haptics.achievement()
+      audio.success()
       setConfetti(Array.from({ length: 38 }, (_, i) => ({
         id: i, x: 15 + Math.random() * 70, y: 15 + Math.random() * 40,
         color: ['#2ecc71','#f1c40f','#6b4fff','#fff','#3498db'][i % 5],
@@ -391,43 +457,20 @@ function LabExperiment({ acid, base, conc, indicator, studentName, onComplete, o
     if (ph > 10 && substep === 'addBase') addWarning('overshoot', WARNINGS.overshoot)
   }, [ph, substep, addWarning])
 
-  // Shake — fires once per gesture (isShaking pulses true→false)
+  // ── Gas bubbles for qualifying reactions ────────────────────────────────
   useEffect(() => {
-    if (!isShaking) return
-    setShakeCount(c => c + 1)
-    haptics.shake()
-    if (acid.id === 'H2SO4') addWarning('violentShake', WARNINGS.violentShake)
-  }, [isShaking, acid.id, addWarning])
+    if (!rxn.gas || !neutralized) return
+    const iv = setInterval(() => {
+      setBubbleParticles(prev => {
+        const alive = prev.map(p => ({ ...p, y: p.y - 1.8, o: p.o - 0.025 })).filter(p => p.o > 0)
+        if (Math.random() > 0.45) alive.push({ id: Math.random(), x: 20 + Math.random() * 14, y: 160, r: 1.5 + Math.random() * 2, o: 0.7 })
+        return alive
+      })
+    }, 110)
+    return () => clearInterval(iv)
+  }, [neutralized, rxn.gas])
 
-  // Continuous pour haptics (every 300 ms while isPouring on real sensor)
-  useEffect(() => {
-    if (isPouring && sensorActive && (substep === 'waterFirst' || substep === 'addAcid' || substep === 'addBase')) {
-      pourHapticRef2.current = setInterval(() => haptics.pour(), 300)
-    } else {
-      clearInterval(pourHapticRef2.current)
-    }
-    return () => clearInterval(pourHapticRef2.current)
-  }, [isPouring, sensorActive, substep])
-
-  // "Hold still" reading toast — fires once when phone steady during addBase
-  useEffect(() => {
-    if (!isSteady || !sensorActive || substep !== 'addBase' || readingTaken) return
-    setReadingTaken(true)
-    haptics.tap()
-    setReadingToast(true)
-    setTimeout(() => setReadingToast(false), 2500)
-  }, [isSteady, sensorActive, substep, readingTaken])
-
-  // Desktop fallback toast — show once
-  useEffect(() => {
-    if (sensorActive === false && !desktopToastShown.current) {
-      desktopToastShown.current = true
-      setDesktopToast(true)
-      setTimeout(() => setDesktopToast(false), 4000)
-    }
-  }, [sensorActive])
-
-  // Switch Access: hold-to-pour interval
+  // ── Switch Access: hold-to-pour interval ────────────────────────────────
   useEffect(() => {
     if (!isPouringBtn || !switchAccess) return
     const RATE = 0.018
@@ -445,7 +488,6 @@ function LabExperiment({ acid, base, conc, indicator, studentName, onComplete, o
     return () => clearInterval(id)
   }, [isPouringBtn, switchAccess, startPH])
 
-  // Switch Access: scanning highlight cycle
   useEffect(() => {
     if (!switchAccess) return
     const count = substep === 'addBase' ? 2 : 1
@@ -453,56 +495,34 @@ function LabExperiment({ acid, base, conc, indicator, studentName, onComplete, o
     return () => clearInterval(id)
   }, [switchAccess, substep])
 
-  const doShake = useCallback(() => {
-    setShakeCount(c => c + 1)
-    if (acid.id === 'H2SO4') addWarning('violentShake', WARNINGS.violentShake)
-  }, [acid.id, addWarning])
+  const doShake = useCallback(() => { haptics.tap(); triggerShake() }, [triggerShake])
 
-  // Safety: trying to pour water after acid already in tube (H2SO4 scenario)
   const handleWaterOnAcid = () => {
-    if (acid.id === 'H2SO4' && acidFill > 0) {
-      addWarning('waterOnAcid', WARNINGS.waterOnAcid)
-    }
+    if (acid.id === 'H2SO4' && acidFill > 0) addWarning('waterOnAcid', WARNINGS.waterOnAcid)
   }
-
-  // Bubbles
-  useEffect(() => {
-    if (!rxn.gas || !neutralized) return
-    const iv = setInterval(() => {
-      setBubbleParticles(prev => {
-        const alive = prev.map(p => ({ ...p, y: p.y - 1.8, o: p.o - 0.025 })).filter(p => p.o > 0)
-        if (Math.random() > 0.45) alive.push({ id: Math.random(), x: 20 + Math.random() * 14, y: 160, r: 1.5 + Math.random() * 2, o: 0.7 })
-        return alive
-      })
-    }, 110)
-    return () => clearInterval(iv)
-  }, [neutralized, rxn.gas])
 
   const handleDropperTap = () => {
     if (substep !== 'addIndicator') return
+    haptics.tap()
     setHasIndicator(true)
     setSubstep('addBase')
   }
 
-  const handleComplete = () => onComplete({
-    type: 'chemistry',
-    startPH,
-    finalPH: ph ?? startPH,
-    timeSeconds: (Date.now() - startTime) / 1000,
-    shakeCount,
-    pHHistory,
-    acidSym: acid.sym,
-    acidFull: acid.full,
-    baseSym: base.sym,
-    baseFull: base.full,
-    concentration: conc,
-    indicator,
-    productName: rxn.name,
-    productFormula: rxn.product,
-    equation: rxn.eq,
-    funFact: rxn.funFact,
-    warningsTriggered: triggeredWarnings,
-  })
+  const handleComplete = () => {
+    haptics.success()
+    onComplete({
+      type: 'chemistry',
+      startPH, finalPH: ph ?? startPH,
+      timeSeconds: (Date.now() - startTime) / 1000,
+      shakeCount, pHHistory,
+      acidSym: acid.sym, acidFull: acid.full,
+      baseSym: base.sym, baseFull: base.full,
+      concentration: conc, indicator,
+      productName: rxn.name, productFormula: rxn.product,
+      equation: rxn.eq, funFact: rxn.funFact,
+      warningsTriggered: triggeredWarnings,
+    })
+  }
 
   const phBarGradient = colorblind
     ? 'linear-gradient(90deg,#e07b00 0%,#f5a623 25%,#f1c40f 40%,#3b82f6 50%,#2563eb 60%,#1e40af 100%)'
@@ -518,41 +538,36 @@ function LabExperiment({ acid, base, conc, indicator, studentName, onComplete, o
   const stepOrder = steps.map(s => s.id)
   const currentStepIdx = stepOrder.indexOf(substep)
 
-  // iOS permission gate
-  if (!permissionGranted) {
-    return (
-      <SensorPermissionScreen
-        onGrant={() => setPermissionGranted(true)}
-        onSkip={() => setPermissionGranted(true)}
-      />
-    )
-  }
+  // Active bottle rotates to match real gamma; idle bottle has gentle idle animation
+  const acidBottleActive = isActive && (substep === 'addAcid' || substep === 'waterFirst')
+  const baseBottleActive = isActive && substep === 'addBase'
 
   return (
     <div style={{ minHeight:'100vh', background:'#0d0d1a', display:'flex', flexDirection:'column', maxWidth:480, margin:'0 auto' }}>
-      {/* Live sensor debug overlay */}
-      <SensorIndicator gamma={gamma} magnitude={magnitude} isPouring={isPouring} isShaking={isShaking} isSteady={isSteady} sensorActive={sensorActive} />
 
-      {/* Hold-still reading toast */}
+      {/* Sensor status pill + live readout */}
+      <SensorIndicator gamma={gamma} magnitude={magnitude} isActive={isActive} />
+
+      {/* Reading stable toast */}
       <AnimatePresence>
         {readingToast && (
           <motion.div initial={{ opacity:0, y:10 }} animate={{ opacity:1, y:0 }} exit={{ opacity:0 }}
             style={{ position:'fixed', bottom:120, left:'50%', transform:'translateX(-50%)', zIndex:200,
               background:'rgba(46,204,113,0.95)', color:'white', borderRadius:12, padding:'10px 20px',
               fontSize:14, fontWeight:700, whiteSpace:'nowrap', boxShadow:'0 4px 20px rgba(46,204,113,0.5)' }}>
-            📏 Reading taken ✓
+            📏 Reading stable ✓
           </motion.div>
         )}
       </AnimatePresence>
 
-      {/* Desktop fallback toast */}
+      {/* Touch fallback toast */}
       <AnimatePresence>
-        {desktopToast && (
+        {fallbackToast && (
           <motion.div initial={{ opacity:0, y:10 }} animate={{ opacity:1, y:0 }} exit={{ opacity:0 }}
             style={{ position:'fixed', bottom:120, left:'50%', transform:'translateX(-50%)', zIndex:200,
               background:'rgba(107,79,255,0.92)', color:'white', borderRadius:12, padding:'10px 20px',
               fontSize:13, fontWeight:600, whiteSpace:'nowrap', boxShadow:'0 4px 20px rgba(107,79,255,0.5)' }}>
-            📱 Use phone for full experience
+            💡 Touch controls active — use phone for full sensor experience
           </motion.div>
         )}
       </AnimatePresence>
@@ -608,14 +623,18 @@ function LabExperiment({ acid, base, conc, indicator, studentName, onComplete, o
 
       {/* Scene */}
       <div style={{ flex:1, display:'flex', alignItems:'center', justifyContent:'center', gap:16, padding:'0 16px', position:'relative' }}>
-        {/* Acid bottle */}
+
+        {/* Acid bottle — rotates to match real gamma tilt */}
         <div style={{ display:'flex', flexDirection:'column', alignItems:'center', gap:4 }}>
           <motion.div
-            style={sensorActive && (substep === 'addAcid' || substep === 'waterFirst')
-              ? { transform: `rotate(${Math.min(gamma, 70)}deg)`, transition: 'transform 0.1s ease' }
-              : {}}
-            animate={!sensorActive && substep === 'addAcid' ? { rotate:[-4,4,-4] } : sensorActive ? {} : { rotate:0 }}
-            transition={{ duration:1.8, repeat: !sensorActive && substep === 'addAcid' ? Infinity : 0 }}>
+            style={acidBottleActive ? {
+              transform: `rotate(${Math.min(Math.abs(gamma), 75)}deg)`,
+              transformOrigin: 'top center',
+              transition: 'transform 0.08s ease',
+            } : {}}
+            animate={!isActive && substep === 'addAcid' ? { rotate:[-4,4,-4] } : {}}
+            transition={{ duration:1.8, repeat: !isActive && substep === 'addAcid' ? Infinity : 0 }}
+          >
             <BottleSVG reagent={acid} size={55} />
           </motion.div>
           <div style={{ fontSize:9, color:acid.color, fontWeight:600 }}>{acid.sym}</div>
@@ -627,22 +646,35 @@ function LabExperiment({ acid, base, conc, indicator, studentName, onComplete, o
           )}
         </div>
 
-        {/* Center: test tube + gauges */}
+        {/* Center: stream + test tube + gauges */}
         <div style={{ display:'flex', flexDirection:'column', alignItems:'center', gap:8 }}>
-          {/* Live pour stream — proportional width to tilt angle */}
+          {/* Liquid stream — width proportional to pourRate, opacity pulses */}
           <AnimatePresence>
-            {pourRate > 0 && (substep === 'waterFirst' || substep === 'addAcid' || substep === 'addBase') && (
+            {showStream && (
               <motion.div key="stream"
-                initial={{ scaleY:0, opacity:0 }} animate={{ scaleY:1, opacity:0.82 }}
-                exit={{ scaleY:0, opacity:0 }} transition={{ duration:0.1 }}
-                style={{ width: streamWidth, height:26,
+                initial={{ scaleY:0, opacity:0 }}
+                animate={{ scaleY:1, opacity:[0.7,1.0,0.7] }}
+                exit={{ scaleY:0, opacity:0 }}
+                transition={{ scaleY:{ duration:0.08 }, opacity:{ duration:0.4, repeat:Infinity, ease:'easeInOut' } }}
+                style={{
+                  width: streamWidth, height:28,
                   background:`linear-gradient(to bottom,${streamColor},transparent)`,
-                  borderRadius:4, transformOrigin:'top', pointerEvents:'none' }} />
+                  borderRadius:4, transformOrigin:'top', pointerEvents:'none',
+                  boxShadow:`0 0 6px ${streamColor}60`,
+                }}
+              />
             )}
           </AnimatePresence>
+
           <div style={{ display:'flex', alignItems:'flex-end', gap:10 }}>
             <TempGauge tempC={tempC} />
-            <TestTube liquidFill={Math.min(0.88, totalFill)} color={liqColor} isGlowing={neutralized} bubbleParticles={bubbleParticles} />
+            {/* Test tube shakes on isShaking */}
+            <motion.div
+              animate={tubeShaking ? { x:[-4,4,-4,4,-2,2,0] } : { x:0 }}
+              transition={{ duration:0.35, ease:'easeOut' }}
+            >
+              <TestTube liquidFill={Math.min(0.88, totalFill)} color={liqColor} isGlowing={neutralized} bubbleParticles={bubbleParticles} />
+            </motion.div>
             {/* Dropper */}
             <div style={{ width:30, display:'flex', flexDirection:'column', alignItems:'center' }}>
               {substep === 'addIndicator' ? (
@@ -668,7 +700,6 @@ function LabExperiment({ acid, base, conc, indicator, studentName, onComplete, o
             </div>
           )}
 
-          {/* Neutralized */}
           <AnimatePresence>
             {neutralized && (
               <motion.div initial={{ opacity:0, scale:0.85 }} animate={{ opacity:1, scale:1 }}
@@ -682,14 +713,17 @@ function LabExperiment({ acid, base, conc, indicator, studentName, onComplete, o
           </AnimatePresence>
         </div>
 
-        {/* Base bottle */}
+        {/* Base bottle — rotates to match real gamma tilt */}
         <div style={{ display:'flex', flexDirection:'column', alignItems:'center', gap:4 }}>
           <motion.div
-            style={sensorActive && substep === 'addBase'
-              ? { transform: `rotate(${Math.min(gamma, 70)}deg)`, transition: 'transform 0.1s ease' }
-              : {}}
-            animate={!sensorActive && substep === 'addBase' ? { rotate:[4,-4,4] } : sensorActive ? {} : { rotate:0 }}
-            transition={{ duration:1.8, repeat: !sensorActive && substep === 'addBase' ? Infinity : 0 }}>
+            style={baseBottleActive ? {
+              transform: `rotate(${Math.min(Math.abs(gamma), 75)}deg)`,
+              transformOrigin: 'top center',
+              transition: 'transform 0.08s ease',
+            } : {}}
+            animate={!isActive && substep === 'addBase' ? { rotate:[4,-4,4] } : {}}
+            transition={{ duration:1.8, repeat: !isActive && substep === 'addBase' ? Infinity : 0 }}
+          >
             <BottleSVG reagent={base} size={55} />
           </motion.div>
           <div style={{ fontSize:9, color:base.color, fontWeight:600 }}>{base.sym}</div>
@@ -698,10 +732,10 @@ function LabExperiment({ acid, base, conc, indicator, studentName, onComplete, o
 
       {/* Instruction */}
       <div data-a11y="instruction" style={{ padding:'4px 20px 6px', textAlign:'center', fontSize:12, color:'rgba(255,255,255,0.45)', lineHeight:1.5 }}>
-        {substep === 'waterFirst' && '💧 Pour water first — required safety step for H₂SO₄'}
-        {substep === 'addAcid' && `⚗️ Tilt to pour ${acid.sym} into the test tube`}
+        {substep === 'waterFirst' && (isActive ? '↔ Tilt phone to pour water — safety first for H₂SO₄' : '💧 Pour water first — required safety step for H₂SO₄')}
+        {substep === 'addAcid' && (isActive ? `↔ Tilt phone to pour ${acid.sym} into the test tube` : `⚗️ Hold button to pour ${acid.sym} into the test tube`)}
         {substep === 'addIndicator' && `💜 Tap the dropper to add ${indicator === 'phenolphthalein' ? 'phenolphthalein' : 'litmus'} indicator`}
-        {substep === 'addBase' && `🔵 Slowly add ${base.sym} — watch the pH rise!`}
+        {substep === 'addBase' && (isActive ? `↔ Tilt to add ${base.sym} — watch the pH rise!` : `🔵 Hold button to add ${base.sym} — watch the pH rise!`)}
         {substep === 'neutralized' && '✅ Perfect neutralization achieved!'}
       </div>
 
@@ -721,7 +755,7 @@ function LabExperiment({ acid, base, conc, indicator, studentName, onComplete, o
       )}
 
       {/* Switch Access buttons */}
-      {switchAccess && (substep === 'waterFirst' || substep === 'addAcid' || substep === 'addBase') && (
+      {switchAccess && isActivePourStep && (
         <div style={{ padding:'0 20px 12px', display:'flex', gap:10 }}>
           <motion.button
             aria-label="Hold to pour liquid"
@@ -734,8 +768,7 @@ function LabExperiment({ acid, base, conc, indicator, studentName, onComplete, o
               border:`2px solid ${scanIdx === 0 ? '#9b59b6' : 'rgba(155,89,182,0.35)'}`,
               background: isPouringBtn ? 'rgba(155,89,182,0.32)' : 'rgba(155,89,182,0.12)',
               color:'white', fontWeight:700,
-              outline: scanIdx === 0 ? '3px solid rgba(155,89,182,0.65)' : 'none',
-              outlineOffset: 3,
+              outline: scanIdx === 0 ? '3px solid rgba(155,89,182,0.65)' : 'none', outlineOffset:3,
               display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', gap:2,
             }}>
             <span style={{ fontSize:22 }}>💧</span>
@@ -743,17 +776,12 @@ function LabExperiment({ acid, base, conc, indicator, studentName, onComplete, o
             <span style={{ fontSize:10, opacity:0.55 }}>Hold to pour</span>
           </motion.button>
           {substep === 'addBase' && (
-            <motion.button
-              aria-label="Shake to mix the solution"
-              whileTap={{ scale:0.93 }}
-              onClick={doShake}
+            <motion.button aria-label="Shake to mix" whileTap={{ scale:0.93 }} onClick={doShake}
               style={{
                 flex:1, height:80, borderRadius:16, cursor:'pointer', fontFamily:'inherit',
                 border:`2px solid ${scanIdx === 1 ? '#2980b9' : 'rgba(41,128,185,0.35)'}`,
-                background:'rgba(41,128,185,0.12)',
-                color:'white', fontWeight:700,
-                outline: scanIdx === 1 ? '3px solid rgba(41,128,185,0.65)' : 'none',
-                outlineOffset: 3,
+                background:'rgba(41,128,185,0.12)', color:'white', fontWeight:700,
+                outline: scanIdx === 1 ? '3px solid rgba(41,128,185,0.65)' : 'none', outlineOffset:3,
                 display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', gap:2,
               }}>
               <span style={{ fontSize:22 }}>🔄</span>
@@ -764,44 +792,89 @@ function LabExperiment({ acid, base, conc, indicator, studentName, onComplete, o
         </div>
       )}
 
-      {/* Desktop fallback controls */}
-      {sensorActive === false && !switchAccess && (substep === 'waterFirst' || substep === 'addAcid' || substep === 'addBase') && (
+      {/* Touch fallback controls — hold-to-pour circular button */}
+      {touchFallback && !switchAccess && isActivePourStep && (
         <div style={{ padding:'0 20px 10px' }}>
-          <div style={{ background:'rgba(255,255,255,0.04)', borderRadius:12, padding:'10px 14px' }}>
-            <div style={{ fontSize:11, color:'rgba(255,255,255,0.45)', marginBottom:10 }}>
-              🖥 Drag up to pour {substep === 'waterFirst' ? 'water' : substep === 'addAcid' ? acid.sym : base.sym}
+          <div style={{ background:'rgba(255,255,255,0.04)', borderRadius:16, padding:'14px 16px' }}>
+            <div style={{ fontSize:11, color:'rgba(255,255,255,0.4)', marginBottom:12, textAlign:'center' }}>
+              Touch controls — tilt phone for full sensor experience
             </div>
-            <div style={{ display:'flex', alignItems:'center', gap:14 }}>
-              <div style={{ display:'flex', flexDirection:'column', alignItems:'center', gap:6 }}>
-                <span style={{ fontSize:10, color:'rgba(255,255,255,0.3)' }}>▲ more</span>
-                <input type="range" min="0" max="60" value={slider}
-                  onChange={e => setSlider(Number(e.target.value))}
-                  onMouseUp={() => setSlider(0)} onTouchEnd={() => setSlider(0)}
-                  orient="vertical"
-                  style={{ height:80, width:28, accentColor:'#6b4fff', writingMode:'vertical-lr', direction:'rtl', cursor:'pointer' }} />
-                <span style={{ fontSize:10, color:'rgba(255,255,255,0.3)' }}>▼ less</span>
-              </div>
-              {substep === 'addBase' && (
+            <div style={{ display:'flex', alignItems:'center', justifyContent:'center', gap:16 }}>
+              {/* Circular hold-to-pour button */}
+              <motion.button
+                aria-label="Hold to pour liquid"
+                onPointerDown={() => setIsTouchPouring(true)}
+                onPointerUp={() => setIsTouchPouring(false)}
+                onPointerLeave={() => setIsTouchPouring(false)}
+                onPointerCancel={() => setIsTouchPouring(false)}
+                animate={{ rotate: isTouchPouring ? 35 : 0, scale: isTouchPouring ? 0.94 : 1 }}
+                transition={{ type:'spring', stiffness:240, damping:22 }}
+                style={{
+                  width:90, height:90, borderRadius:'50%', border:'none',
+                  background: isTouchPouring
+                    ? 'radial-gradient(circle,rgba(107,79,255,0.5),rgba(107,79,255,0.2))'
+                    : 'radial-gradient(circle,rgba(107,79,255,0.2),rgba(107,79,255,0.08))',
+                  boxShadow: isTouchPouring
+                    ? '0 0 28px rgba(107,79,255,0.6), inset 0 0 16px rgba(107,79,255,0.3)'
+                    : '0 4px 18px rgba(107,79,255,0.2)',
+                  border: `2px solid ${isTouchPouring ? 'rgba(107,79,255,0.8)' : 'rgba(107,79,255,0.45)'}`,
+                  cursor:'pointer', fontFamily:'inherit', color:'white',
+                  display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', gap:2,
+                  touchAction:'none',
+                }}>
+                <span style={{ fontSize:24 }}>💧</span>
+                <span style={{ fontSize:12, fontWeight:700 }}>POUR</span>
+                <span style={{ fontSize:9, opacity:0.55 }}>Hold</span>
+              </motion.button>
+
+              {/* Shake button */}
+              <motion.button
+                aria-label="Shake to mix"
+                whileTap={{ scale:0.9, rotate:[0,-8,8,-4,4,0] }}
+                onClick={doShake}
+                style={{
+                  width:90, height:90, borderRadius:'50%', border:'none',
+                  background:'radial-gradient(circle,rgba(41,128,185,0.25),rgba(41,128,185,0.08))',
+                  boxShadow:'0 4px 18px rgba(41,128,185,0.2)',
+                  border:'2px solid rgba(41,128,185,0.4)',
+                  cursor:'pointer', fontFamily:'inherit', color:'white',
+                  display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', gap:2,
+                }}>
+                <span style={{ fontSize:24 }}>🔄</span>
+                <span style={{ fontSize:12, fontWeight:700 }}>SHAKE</span>
+                <span style={{ fontSize:9, opacity:0.55 }}>Tap</span>
+              </motion.button>
+
+              {/* Steady / reading lock */}
+              {substep === 'addBase' && !readingTaken && (
                 <motion.button
-                  aria-label="Shake to mix the solution"
-                  whileTap={{ scale:0.93 }}
-                  onClick={doShake}
+                  aria-label="Lock pH reading"
+                  whileTap={{ scale:0.92 }}
+                  onClick={() => {
+                    if (readingTaken) return
+                    setReadingTaken(true)
+                    haptics.reading()
+                    audio.reading()
+                    setReadingToast(true)
+                    setTimeout(() => setReadingToast(false), 2500)
+                  }}
                   style={{
-                    flex:1, height:80, borderRadius:16, cursor:'pointer', fontFamily:'inherit',
-                    border:'2px solid rgba(41,128,185,0.45)',
-                    background:'rgba(41,128,185,0.12)',
-                    color:'white', fontWeight:700,
+                    width:90, height:90, borderRadius:'50%', border:'none',
+                    background:'radial-gradient(circle,rgba(46,204,113,0.2),rgba(46,204,113,0.06))',
+                    boxShadow:'0 4px 18px rgba(46,204,113,0.15)',
+                    border:'2px solid rgba(46,204,113,0.35)',
+                    cursor:'pointer', fontFamily:'inherit', color:'white',
                     display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', gap:2,
                   }}>
-                  <span style={{ fontSize:22 }}>🔄</span>
-                  <span style={{ fontSize:14 }}>SHAKE</span>
+                  <span style={{ fontSize:22 }}>📏</span>
+                  <span style={{ fontSize:11, fontWeight:700 }}>STEADY</span>
+                  <span style={{ fontSize:9, opacity:0.55 }}>Lock pH</span>
                 </motion.button>
               )}
             </div>
           </div>
         </div>
       )}
-
 
       {/* Report button */}
       <div style={{ padding:'0 20px 32px' }}>
