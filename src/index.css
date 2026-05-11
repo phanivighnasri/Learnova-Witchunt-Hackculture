@@ -1,0 +1,164 @@
+@import "tailwindcss";
+
+:root {
+  --bg: #0d0d1a;
+  --accent: #6b4fff;
+  --success: #2ecc71;
+  --danger: #e74c3c;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  background: #0d0d1a;
+  color: white;
+  font-family: 'Inter', system-ui, sans-serif;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+  -webkit-user-select: none;
+  margin: 0;
+  padding: 0;
+}
+
+#root {
+  min-height: 100vh;
+  width: 100%;
+  max-width: 100%;
+}
+
+.glass {
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.1);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.glow-text {
+  text-shadow: 0 0 30px rgba(107,79,255,0.9), 0 0 60px rgba(107,79,255,0.4);
+}
+
+.glow-purple {
+  box-shadow: 0 0 25px rgba(107,79,255,0.6), 0 0 50px rgba(107,79,255,0.3);
+}
+
+.glow-green {
+  box-shadow: 0 0 25px rgba(46,204,113,0.7), 0 0 50px rgba(46,204,113,0.35);
+}
+
+.glow-red {
+  box-shadow: 0 0 25px rgba(231,76,60,0.7), 0 0 50px rgba(231,76,60,0.35);
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% center; }
+  100% { background-position: 200% center; }
+}
+
+.shimmer-text {
+  background: linear-gradient(90deg, #fff 30%, #a78bfa 50%, #fff 70%);
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: shimmer 3s linear infinite;
+}
+
+@keyframes float-particle {
+  0% { transform: translateY(0px) scale(1); opacity: 0.8; }
+  100% { transform: translateY(-80px) scale(0.3); opacity: 0; }
+}
+
+@keyframes pulse-glow {
+  0%, 100% { opacity: 0.6; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.05); }
+}
+
+.pulse-glow { animation: pulse-glow 2s ease-in-out infinite; }
+
+.no-scrollbar::-webkit-scrollbar { display: none; }
+.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+/* Styled range input */
+input[type=range] {
+  -webkit-appearance: none;
+  appearance: none;
+  height: 6px;
+  border-radius: 3px;
+  background: rgba(255,255,255,0.1);
+  outline: none;
+}
+input[type=range]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #6b4fff;
+  box-shadow: 0 0 10px rgba(107,79,255,0.6);
+  cursor: pointer;
+}
+input[type=range]::-moz-range-thumb {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #6b4fff;
+  border: none;
+  cursor: pointer;
+}
+
+/* Styled text input */
+input[type=text], input[type=password] {
+  outline: none;
+  -webkit-appearance: none;
+}
+input[type=text]:focus, input[type=password]:focus {
+  border-color: rgba(107,79,255,0.5) !important;
+  box-shadow: 0 0 0 3px rgba(107,79,255,0.12);
+}
+
+/* Smooth scroll */
+html { scroll-behavior: smooth; }
+
+/* ── Accessibility ──────────────────────────────────────────────── */
+
+/* Dyslexia mode — font, spacing, background */
+.dyslexia-mode * {
+  font-family: "OpenDyslexic", system-ui, sans-serif !important;
+  letter-spacing: 0.12em !important;
+  word-spacing: 0.16em !important;
+  line-height: 1.8 !important;
+}
+.dyslexia-mode body {
+  background: #1a1408 !important;
+  font-size: 18px !important;
+}
+/* Warm tint for descriptive text in dyslexia mode */
+.dyslexia-mode p,
+.dyslexia-mode [data-a11y="instruction"] {
+  color: #f5e6c8 !important;
+}
+
+/* Colorblind mode helpers (used by components reading useAccessibility) */
+.colorblind-mode .ph-indicator-acid { color: #e07b00 !important; }
+.colorblind-mode .ph-indicator-base { color: #3b82f6 !important; }
+
+/* Switch access — enforce 60 px minimum touch targets */
+.switch-access-mode button,
+.switch-access-mode [role="button"] {
+  min-height: 60px !important;
+  min-width: 60px !important;
+}
+
+/* Universal focus ring for keyboard navigation */
+button:focus-visible,
+[role="button"]:focus-visible,
+[role="switch"]:focus-visible,
+input:focus-visible {
+  outline: 3px solid rgba(107,79,255,0.85) !important;
+  outline-offset: 3px !important;
+}
+
+/* Never block text selection in accessible builds */
+.dyslexia-mode * {
+  user-select: text !important;
+  -webkit-user-select: text !important;
+}
