@@ -2,7 +2,7 @@ import { createContext, useContext, useState, useEffect, useCallback, useRef } f
 import { motion, AnimatePresence } from 'framer-motion'
 
 const DEFAULT = { dyslexia: false, deafHoH: false, switchAccess: false, colorblind: false }
-const LS_KEY = 'lablens-a11y'
+const LS_KEY = 'learnova-a11y'
 
 const Ctx = createContext({ settings: DEFAULT, toggle: () => {}, reset: () => {}, triggerAlert: () => {} })
 export const useAccessibility = () => useContext(Ctx)

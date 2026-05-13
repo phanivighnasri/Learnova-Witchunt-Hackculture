@@ -52,7 +52,7 @@ function solidPNG(size, r, g, b) {
   ])
 }
 
-// LabLens purple #6b4fff = rgb(107, 79, 255)
+// Learnova purple #6b4fff = rgb(107, 79, 255)
 const R = 107, G = 79, B = 255
 fs.writeFileSync(path.join(outDir, 'icon-192.png'), solidPNG(192, R, G, B))
 fs.writeFileSync(path.join(outDir, 'icon-512.png'), solidPNG(512, R, G, B))

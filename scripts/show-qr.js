@@ -13,7 +13,7 @@ for (const name of Object.keys(nets)) {
 }
 
 const url = `http://${ip}:3000`
-console.log('\n\x1b[35m🔬 LabLens\x1b[0m — ready for mobile testing')
+console.log('\n\x1b[35m🔬 Learnova\x1b[0m — ready for mobile testing')
 console.log(`\x1b[36m   Local:   \x1b[0mhttp://localhost:3000`)
 console.log(`\x1b[36m   Network: \x1b[0m${url}`)
 console.log('\n\x1b[33m📱 Scan with your phone (same WiFi):\x1b[0m\n')

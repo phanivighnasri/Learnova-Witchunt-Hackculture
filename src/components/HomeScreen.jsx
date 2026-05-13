@@ -189,7 +189,7 @@ export default function HomeScreen({ onStart, studentName }) {
           </motion.div>
 
           <h1 className="shimmer-text" style={{ fontSize: 52, fontWeight: 900, letterSpacing: -2, marginBottom: 10, lineHeight: 1 }}>
-            LabLens
+            Learnova
           </h1>
           <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: 15, letterSpacing: 1, textTransform: 'uppercase' }}>
             Your lab. Your phone. Real science.
@@ -304,7 +304,7 @@ export default function HomeScreen({ onStart, studentName }) {
           transition={{ delay: 0.9 }}
           style={{ textAlign: 'center', marginTop: 40, color: 'rgba(255,255,255,0.2)', fontSize: 12 }}
         >
-          WitchHunt 2026 · Education Track · Powered by Gemini AI
+          WitchHunt 2026 · Education Track · Powered by Groq AI
         </motion.div>
       </div>
     </div>

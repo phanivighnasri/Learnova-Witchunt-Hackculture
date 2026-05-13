@@ -59,7 +59,7 @@ export default function StudentSetup({ onDone, onBack, name: initName }) {
             />
           </div>
 
-          {/* Gemini AI badge */}
+          {/* Groq AI badge */}
           <div style={{
             display: 'flex', alignItems: 'center', gap: 8,
             background: 'rgba(66,133,244,0.08)', border: '1px solid rgba(66,133,244,0.2)',
@@ -69,7 +69,7 @@ export default function StudentSetup({ onDone, onBack, name: initName }) {
               <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
             </svg>
             <span style={{ fontSize: 12, color: 'rgba(255,255,255,0.45)' }}>
-              AI tutor powered by Gemini · your report is generated instantly
+              AI tutor powered by Groq · your report is generated instantly
             </span>
           </div>
 

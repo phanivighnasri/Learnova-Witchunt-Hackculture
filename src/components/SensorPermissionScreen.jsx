@@ -75,7 +75,7 @@ export default function SensorPermissionScreen({ onDone }) {
             <p style={{ fontSize: 16, color: 'rgba(255,255,255,0.5)', lineHeight: 1.7, maxWidth: 310, margin: '0 0 52px' }}>
               {status === 'granted'
                 ? 'Sensors active. Tilt to pour, shake to mix!'
-                : "LabLens uses your phone's gyroscope to let you physically pour, shake and hold test tubes"}
+                : "Learnova uses your phone's gyroscope to let you physically pour, shake and hold test tubes"}
             </p>
             {status !== 'granted' && (
               <>

@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import { motion } from 'framer-motion'
-import { callGroq, buildChemPrompt, buildBioPrompt, buildPhysicsPrompt } from '../utils/gemini'
+import { callGroq, buildChemPrompt, buildBioPrompt, buildPhysicsPrompt } from '../utils/groq'
 import ParticleField from './ParticleField'
 
 // ── pH Graph (line chart) ──────────────────────────────────────────────────
@@ -393,7 +393,7 @@ export default function LabReport({ result, onTryAnother }) {
 
         {/* Hackathon credit */}
         <div style={{ textAlign: 'center', marginTop: 32, color: 'rgba(255,255,255,0.15)', fontSize: 11, lineHeight: 1.7 }}>
-          LabLens · WitchHunt 2026 · Education Track<br />
+          Learnova · WitchHunt 2026 · Education Track<br />
           Built for students who deserve a lab.
         </div>
       </div>
