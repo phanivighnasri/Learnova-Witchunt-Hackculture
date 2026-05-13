@@ -1,4 +1,3 @@
-````md id="o9m2kf"
 # Learnova
 
 AI-Powered Accessible Virtual Science Labs
@@ -59,6 +58,24 @@ Clone the repository:
 ```bash
 git clone https://github.com/your-username/learnova.git
 cd learnova
+## Accessibility Features
+
+- Voice-guided navigation
+- Caption-based learning
+- Dyslexia-friendly typography
+- Gesture-light controls
+- Keyboard accessibility
+- Low-end device support
+
+---
+
+## Installation
+
+Clone the repository:
+
+```bash
+git clone https://github.com/your-username/learnova.git
+cd learnova
 ````
 
 Install dependencies:
@@ -81,21 +98,7 @@ http://localhost:3000
 
 ---
 
-## Project Structure
 
-```txt
-src/
- ├── components/
- ├── labs/
- ├── accessibility/
- ├── ai/
- ├── animations/
- ├── hooks/
- ├── utils/
- └── styles/
-```
-
----
 
 ## Future Scope
 
